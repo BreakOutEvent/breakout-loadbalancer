@@ -1,0 +1,28 @@
+upstream media-server {
+    ip_hash;
+    server media-01.breakout.xyz:3001;
+}
+
+server {
+    listen        80;
+    server_name   media.break-out.org;
+
+    return 301 https://media.break-out.org$request_uri;
+}
+
+server {
+    listen        443 ssl spdy;
+
+    server_name   media.break-out.org;
+
+    ssl on;
+    ssl_certificate     /etc/letsencrypt/live/media.break-out.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/media.break-out.org/privkey.pem;
+
+    access_log          /var/log/nginx/media.break-out.org/access.log;
+    error_log           /var/log/nginx/media.break-out.org/error.log;
+
+    location / {
+        proxy_pass http://media-server;
+    }
+}

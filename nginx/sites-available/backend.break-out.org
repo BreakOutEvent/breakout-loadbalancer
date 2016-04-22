@@ -1,0 +1,32 @@
+limit_req_zone $binary_remote_addr zone=backendAPI:32m rate=5r/s;
+
+upstream backend-api {
+    ip_hash;
+    server backend-01.breakout.xyz:8082;
+    #server backend-02.breakout.xyz:8082 down;
+}
+
+server {
+    listen        80;
+    server_name   backend.break-out.org;
+
+    return 301 https://backend.break-out.org$request_uri;
+}
+
+server {
+    listen        443 ssl spdy;
+
+    server_name   backend.break-out.org;
+
+    ssl on;
+    ssl_certificate     /etc/letsencrypt/live/backend.break-out.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/backend.break-out.org/privkey.pem;
+
+    access_log          /var/log/nginx/backend.break-out.org/access.log;
+    error_log           /var/log/nginx/backend.break-out.org/error.log;
+
+    location / {
+        limit_req zone=backendAPI burst=12;
+        proxy_pass http://backend-api;
+    }
+}

@@ -1,0 +1,28 @@
+upstream mail-server {
+    ip_hash;
+    server mail-01.breakout.xyz:3003;
+}
+
+server {
+    listen        80;
+    server_name   mail.break-out.org;
+
+    return 301 https://mail.break-out.org$request_uri;
+}
+
+server {
+    listen        443 ssl spdy;
+
+    server_name   mail.break-out.org;
+
+    ssl on;
+    ssl_certificate     /etc/letsencrypt/live/mail.break-out.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mail.break-out.org/privkey.pem;
+
+    access_log          /var/log/nginx/mail.break-out.org/access.log;
+    error_log           /var/log/nginx/mail.break-out.org/error.log;
+
+    location / {
+        proxy_pass http://mail-server;
+    }
+}
