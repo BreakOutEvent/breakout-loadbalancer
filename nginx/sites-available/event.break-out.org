@@ -14,8 +14,8 @@ server {
     listen        443 ssl spdy;
 
     server_name   event.break-out.org;
-	
-	client_max_body_size 2G;
+    
+    client_max_body_size 2G;
 
     ssl on;
     ssl_certificate     /etc/letsencrypt/live/event.break-out.org/fullchain.pem;
